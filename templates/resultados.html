@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resultados Dinámicos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                },
+            },
+        };
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+
+    <div id="app" class="bg-white p-8 rounded-xl shadow-lg w-full max-w-2xl text-center">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6">Visualizador de Resultados</h1>
+        
+        <!-- Botón para mostrar/ocultar los resultados -->
+        <button id="toggleResultsBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-300 transform hover:scale-105">
+            Ver los resultados
+        </button>
+
+        <!-- Contenedor de resultados, inicialmente oculto -->
+        <div id="resultsContainer" class="hidden mt-8 transition-all duration-500">
+            <div class="flex justify-center space-x-4 mb-6">
+                <button id="showAllBtn" class="bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg shadow-sm transition-colors duration-200">
+                    Ver todos
+                </button>
+                <button id="showByDeptBtn" class="bg-purple-500 hover:bg-purple-600 text-white font-semibold py-2 px-4 rounded-lg shadow-sm transition-colors duration-200">
+                    Ver por departamento
+                </button>
+            </div>
+            
+            <div id="resultsDisplay" class="text-left bg-gray-50 p-6 rounded-lg border border-gray-200">
+                <!-- Los resultados se renderizarán aquí -->
+                <p class="text-gray-500">Haz clic en una opción para ver los datos.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Datos de ejemplo
+        const mockData = [
+            { nombre: 'Juan Pérez', departamento: 'Ventas', ventas: 15000 },
+            { nombre: 'María García', departamento: 'Marketing', ventas: 8000 },
+            { nombre: 'Pedro Ramírez', departamento: 'Ventas', ventas: 12000 },
+            { nombre: 'Ana López', departamento: 'Recursos Humanos', ventas: 5000 },
+            { nombre: 'Carlos Ruiz', departamento: 'Ventas', ventas: 20000 },
+            { nombre: 'Sofía Díaz', departamento: 'Marketing', ventas: 10000 },
+            { nombre: 'Javier Castro', departamento: 'Recursos Humanos', ventas: 6000 },
+            { nombre: 'Elena Mora', departamento: 'Ventas', ventas: 17500 },
+        ];
+
+        // Referencias a elementos del DOM
+        const toggleResultsBtn = document.getElementById('toggleResultsBtn');
+        const resultsContainer = document.getElementById('resultsContainer');
+        const showAllBtn = document.getElementById('showAllBtn');
+        const showByDeptBtn = document.getElementById('showByDeptBtn');
+        const resultsDisplay = document.getElementById('resultsDisplay');
+
+        // Función para renderizar todos los resultados
+        function renderAllResults() {
+            let html = '<h3 class="text-xl font-bold mb-4 text-gray-700">Todos los Resultados</h3>';
+            html += '<ul class="divide-y divide-gray-200">';
+            mockData.forEach(item => {
+                html += `<li class="py-3">
+                            <p class="text-gray-800 font-medium">${item.nombre}</p>
+                            <p class="text-sm text-gray-500">Departamento: ${item.departamento} | Ventas: $${item.ventas.toLocaleString()}</p>
+                        </li>`;
+            });
+            html += '</ul>';
+            resultsDisplay.innerHTML = html;
+        }
+
+        // Función para renderizar los resultados agrupados por departamento
+        function renderByDepartment() {
+            const departments = mockData.reduce((acc, item) => {
+                if (!acc[item.departamento]) {
+                    acc[item.departamento] = [];
+                }
+                acc[item.departamento].push(item);
+                return acc;
+            }, {});
+
+            let html = '<h3 class="text-xl font-bold mb-4 text-gray-700">Resultados por Departamento</h3>';
+            
+            for (const dept in departments) {
+                const totalVentas = departments[dept].reduce((sum, item) => sum + item.ventas, 0);
+                html += `<div class="mb-6 last:mb-0">
+                            <h4 class="text-lg font-semibold text-gray-600 mb-2">${dept} <span class="text-sm font-normal text-gray-500">(Total: $${totalVentas.toLocaleString()})</span></h4>
+                            <ul class="border-l-2 border-purple-300 pl-4 space-y-2">`;
+                departments[dept].forEach(item => {
+                    html += `<li class="text-gray-800">${item.nombre} | Ventas: $${item.ventas.toLocaleString()}</li>`;
+                });
+                html += `</ul></div>`;
+            }
+            resultsDisplay.innerHTML = html;
+        }
+
+        // Event Listeners
+        toggleResultsBtn.addEventListener('click', () => {
+            const isHidden = resultsContainer.classList.contains('hidden');
+            if (isHidden) {
+                resultsContainer.classList.remove('hidden');
+                toggleResultsBtn.textContent = 'Ocultar resultados';
+            } else {
+                resultsContainer.classList.add('hidden');
+                toggleResultsBtn.textContent = 'Ver los resultados';
+            }
+        });
+
+        showAllBtn.addEventListener('click', renderAllResults);
+        showByDeptBtn.addEventListener('click', renderByDepartment);
+        
+        // Cargar los resultados por defecto al mostrar el panel
+        resultsContainer.addEventListener('transitionend', (event) => {
+            if (!resultsContainer.classList.contains('hidden') && event.propertyName === 'opacity') {
+                renderAllResults();
+            }
+        });
+    </script>
+</body>
+</html>
