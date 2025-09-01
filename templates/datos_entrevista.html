@@ -18,26 +18,15 @@
     <div class="max-w-4xl w-full bg-white p-8 rounded-2xl shadow-lg border border-slate-200">
         <!-- Logo y Título -->
         <div class="flex flex-col items-center mb-6">
-            <!-- La ruta del logo apunta a 'imagen/logo_faymex.png' dentro de la carpeta 'static' de la aplicación -->
+            <!-- Usamos una imagen de marcador de posición ya que no tenemos acceso a archivos locales -->
             <img src="/static/imagen/logo_faymex.png" alt="Logo de Faymex" class="rounded-lg drop-shadow w-64 h-auto">
             <h1 class="text-3xl font-bold text-center text-slate-800 mt-4 mb-2">Registro de Entrevistas de Negocio</h1>
         </div>
         
-        <!-- Sección para mostrar los mensajes flash -->
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                <div class="mt-4 mb-8">
-                    {% for category, message in messages %}
-                        <div class="p-4 rounded-lg text-white font-semibold shadow-md mb-2 
-                            {% if category == 'success' %}bg-green-500{% elif category == 'error' %}bg-red-500{% endif %}">
-                            {{ message }}
-                        </div>
-                    {% endfor %}
-                </div>
-            {% endif %}
-        {% endwith %}
+        <!-- Sección para mostrar los mensajes -->
+        <div id="message-container" class="mt-4 mb-8"></div>
 
-        <form id="interviewForm" class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8" method="POST" action="/submit">
+        <form id="interviewForm" class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
             <!-- Bloque de Información del Contacto -->
             <div class="col-span-1 md:col-span-2">
                 <h2 class="text-xl font-semibold text-slate-700 mb-4">Datos del Contacto</h2>
@@ -91,26 +80,26 @@
             <div class="col-span-1 md:col-span-2">
                 <h2 class="text-xl font-semibold text-slate-700 mb-4">Preguntas de la Entrevista</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Sección de Desafíos -->
+                    <!-- Sección de preguntas genéricas (siempre visible) -->
                     <div id="generic-questions" class="col-span-1 md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
                         <!-- Sección de Desafíos de proceso -->
                         <div class="p-5 bg-emerald-50 rounded-xl shadow-inner border border-emerald-200">
                             <p class="text-sm font-bold text-slate-700 mb-4">¿Cuál es el proceso que más tiempo les toma actualmente para obtener la información que necesitan?</p>
                             <div class="space-y-2">
                                 <label class="flex items-center text-slate-700">
-                                    <input type="checkbox" name="proceso_mas_largo_manual" class="rounded text-emerald-600 focus:ring-emerald-500 mr-2">
+                                    <input type="checkbox" name="proceso_mas_largo" value="proceso_manual" class="rounded text-emerald-600 focus:ring-emerald-500 mr-2">
                                     Proceso manual
                                 </label>
                                 <label class="flex items-center text-slate-700">
-                                    <input type="checkbox" name="proceso_mas_largo_multiples_fuentes" class="rounded text-emerald-600 focus:ring-emerald-500 mr-2">
+                                    <input type="checkbox" name="proceso_mas_largo" value="multiples_fuentes" class="rounded text-emerald-600 focus:ring-emerald-500 mr-2">
                                     Múltiples fuentes
                                 </label>
                                 <label class="flex items-center text-slate-700">
-                                    <input type="checkbox" name="proceso_mas_largo_espera_reportes" class="rounded text-emerald-600 focus:ring-emerald-500 mr-2">
+                                    <input type="checkbox" name="proceso_mas_largo" value="espera_reportes" class="rounded text-emerald-600 focus:ring-emerald-500 mr-2">
                                     Espera de reportes
                                 </label>
                                 <label class="flex items-center text-slate-700">
-                                    <input type="checkbox" name="proceso_mas_largo_validacion_datos" class="rounded text-emerald-600 focus:ring-emerald-500 mr-2">
+                                    <input type="checkbox" name="proceso_mas_largo" value="validacion_datos" class="rounded text-emerald-600 focus:ring-emerald-500 mr-2">
                                     Validación de datos
                                 </label>
                             </div>
@@ -121,23 +110,23 @@
                             <p class="text-sm font-bold text-slate-700 mb-4">¿Qué desafíos enfrentas con la información?</p>
                             <div class="space-y-2">
                                 <label class="flex items-center text-slate-700">
-                                    <input type="checkbox" name="desafio_info_desactualizada" class="rounded text-fuchsia-600 focus:ring-fuchsia-500 mr-2">
+                                    <input type="checkbox" name="desafio_info" value="desactualizada" class="rounded text-fuchsia-600 focus:ring-fuchsia-500 mr-2">
                                     Información desactualizada
                                 </label>
                                 <label class="flex items-center text-slate-700">
-                                    <input type="checkbox" name="desafio_falta_acceso" class="rounded text-fuchsia-600 focus:ring-fuchsia-500 mr-2">
+                                    <input type="checkbox" name="desafio_info" value="falta_acceso" class="rounded text-fuchsia-600 focus:ring-fuchsia-500 mr-2">
                                     No tengo acceso a lo que necesito
                                 </label>
                                 <label class="flex items-center text-slate-700">
-                                    <input type="checkbox" name="desafio_datos_dispersos" class="rounded text-fuchsia-600 focus:ring-fuchsia-500 mr-2">
+                                    <input type="checkbox" name="desafio_info" value="datos_dispersos" class="rounded text-fuchsia-600 focus:ring-fuchsia-500 mr-2">
                                     Los datos están en diferentes lugares
                                 </label>
                                 <label class="flex items-center text-slate-700">
-                                    <input type="checkbox" name="desafio_falta_reporte" class="rounded text-fuchsia-600 focus:ring-fuchsia-500 mr-2">
+                                    <input type="checkbox" name="desafio_info" value="falta_reporte" class="rounded text-fuchsia-600 focus:ring-fuchsia-500 mr-2">
                                     No hay reportes disponibles
                                 </label>
                                 <label class="flex items-center text-slate-700">
-                                    <input type="checkbox" name="desafio_dificil_generar_reporte" class="rounded text-fuchsia-600 focus:ring-fuchsia-500 mr-2">
+                                    <input type="checkbox" name="desafio_info" value="dificil_generar_reporte" class="rounded text-fuchsia-600 focus:ring-fuchsia-500 mr-2">
                                     Tarda mucho tiempo obtener la información
                                 </label>
                             </div>
@@ -151,19 +140,19 @@
                             <p class="text-sm font-bold text-slate-700 mb-4">¿Qué desafíos de infraestructura o seguridad encuentran para el manejo de datos?</p>
                             <div class="space-y-2">
                                 <label class="flex items-center text-slate-700">
-                                    <input type="checkbox" name="infraestructura_dependencia_manual" class="rounded text-sky-600 focus:ring-sky-500 mr-2">
+                                    <input type="checkbox" name="infraestructura_desafio" value="dependencia_manual" class="rounded text-sky-600 focus:ring-sky-500 mr-2">
                                     Dependencia de procesos manuales
                                 </label>
                                 <label class="flex items-center text-slate-700">
-                                    <input type="checkbox" name="infraestructura_falta_estandarizacion" class="rounded text-sky-600 focus:ring-sky-500 mr-2">
+                                    <input type="checkbox" name="infraestructura_desafio" value="falta_estandarizacion" class="rounded text-sky-600 focus:ring-sky-500 mr-2">
                                     Falta de estandarización
                                 </label>
                                 <label class="flex items-center text-slate-700">
-                                    <input type="checkbox" name="infraestructura_vulnerabilidades" class="rounded text-sky-600 focus:ring-sky-500 mr-2">
+                                    <input type="checkbox" name="infraestructura_desafio" value="vulnerabilidades" class="rounded text-sky-600 focus:ring-sky-500 mr-2">
                                     Vulnerabilidades de seguridad
                                 </label>
                                 <label class="flex items-center text-slate-700">
-                                    <input type="checkbox" name="infraestructura_poca_escalabilidad" class="rounded text-sky-600 focus:ring-sky-500 mr-2">
+                                    <input type="checkbox" name="infraestructura_desafio" value="poca_escalabilidad" class="rounded text-sky-600 focus:ring-sky-500 mr-2">
                                     Poca escalabilidad
                                 </label>
                             </div>
@@ -175,19 +164,19 @@
                         <p class="text-sm font-bold text-slate-700 mb-4">¿Cuál sería el primer gran impacto que le gustaría que lograra en este puesto?</p>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2">
                             <label class="flex items-center text-slate-700">
-                                <input type="checkbox" name="decision_optimizacion_recursos" class="rounded text-amber-600 focus:ring-amber-500 mr-2">
+                                <input type="checkbox" name="decision" value="optimizacion_recursos" class="rounded text-amber-600 focus:ring-amber-500 mr-2">
                                 Optimización de recursos
                             </label>
                             <label class="flex items-center text-slate-700">
-                                <input type="checkbox" name="decision_reduccion_costos" class="rounded text-amber-600 focus:ring-amber-500 mr-2">
+                                <input type="checkbox" name="decision" value="reduccion_costos" class="rounded text-amber-600 focus:ring-amber-500 mr-2">
                                 Reducción de costos
                             </label>
                             <label class="flex items-center text-slate-700">
-                                <input type="checkbox" name="decision_mejora_planificacion" class="rounded text-amber-600 focus:ring-amber-500 mr-2">
+                                <input type="checkbox" name="decision" value="mejora_planificacion" class="rounded text-amber-600 focus:ring-amber-500 mr-2">
                                 Mejora de planificación
                             </label>
                             <label class="flex items-center text-slate-700">
-                                <input type="checkbox" name="decision_identificacion_ineficiencias" class="rounded text-amber-600 focus:ring-amber-500 mr-2">
+                                <input type="checkbox" name="decision" value="identificacion_ineficiencias" class="rounded text-amber-600 focus:ring-amber-500 mr-2">
                                 Identificación de ineficiencias
                             </label>
                         </div>
@@ -205,13 +194,18 @@
                     Guardar Entrevista
                 </button>
             </div>
-            
-            
         </form>
+        
+        <!-- Sección para mostrar los datos capturados -->
+        <div id="results-container" class="mt-8 pt-6 border-t border-slate-200 hidden">
+            <h2 class="text-xl font-semibold text-slate-700 mb-4">Datos Registrados</h2>
+            <pre id="results-display" class="bg-slate-100 p-4 rounded-lg text-sm text-slate-700 overflow-x-auto"></pre>
+        </div>
     </div>
     
-    <!-- Script para manejar la lógica de la UI -->
+    <!-- Script para manejar la lógica de la UI y la captura de datos -->
     <script>
+        const interviewForm = document.getElementById('interviewForm');
         const nombreInput = document.getElementById('nombre_contacto');
         const fechaInput = document.getElementById('fecha_entrevista');
         const departamentoSelect = document.getElementById('departamento');
@@ -219,6 +213,9 @@
         const otroDepartamentoInput = document.getElementById('otro_departamento');
         const genericQuestions = document.getElementById('generic-questions');
         const sistemasQuestions = document.getElementById('sistemas-questions');
+        const messageContainer = document.getElementById('message-container');
+        const resultsContainer = document.getElementById('results-container');
+        const resultsDisplay = document.getElementById('results-display');
 
         // Función para obtener la fecha de hoy en formato YYYY-MM-DD
         function getTodayDate() {
@@ -255,6 +252,70 @@
                 sistemasQuestions.classList.add('hidden');
             }
         });
+
+        // Manejar el envío del formulario
+        interviewForm.addEventListener('submit', function(event) {
+            // Prevenir el envío real del formulario al servidor
+            event.preventDefault();
+
+            // Ocultar mensajes anteriores y el contenedor de resultados
+            showMessage('');
+            resultsContainer.classList.add('hidden');
+            resultsDisplay.textContent = '';
+
+            // Recopilar los datos del formulario
+            const formData = new FormData(interviewForm);
+            const data = {};
+            for (let [key, value] of formData.entries()) {
+                data[key] = value;
+            }
+
+            // Manejar los checkboxes de manera especial para agruparlos
+            const checkboxes = interviewForm.querySelectorAll('input[type="checkbox"]:checked');
+            const checkedData = {};
+            checkboxes.forEach(checkbox => {
+                const name = checkbox.name;
+                const value = checkbox.value;
+                if (!checkedData[name]) {
+                    checkedData[name] = [];
+                }
+                checkedData[name].push(value);
+            });
+
+            // Combinar todos los datos
+            const finalData = { ...data, ...checkedData };
+
+            // Mostrar un mensaje de éxito
+            showMessage('Entrevista guardada con éxito.', 'success');
+
+            // Mostrar los datos en el contenedor de resultados
+            resultsDisplay.textContent = JSON.stringify(finalData, null, 2);
+            resultsContainer.classList.remove('hidden');
+
+            // Opcional: limpiar el formulario después del envío exitoso
+            interviewForm.reset();
+            fechaInput.value = ''; // Limpiar la fecha
+            sistemasQuestions.classList.add('hidden');
+            genericQuestions.classList.remove('hidden');
+        });
+
+        // Función para mostrar mensajes de estado
+        function showMessage(message, type = 'success') {
+            if (message) {
+                const messageDiv = document.createElement('div');
+                messageDiv.classList.add('p-4', 'rounded-lg', 'text-white', 'font-semibold', 'shadow-md', 'mb-2');
+                if (type === 'success') {
+                    messageDiv.classList.add('bg-green-500');
+                } else if (type === 'error') {
+                    messageDiv.classList.add('bg-red-500');
+                }
+                messageDiv.textContent = message;
+                messageContainer.innerHTML = '';
+                messageContainer.appendChild(messageDiv);
+            } else {
+                messageContainer.innerHTML = '';
+            }
+        }
     </script>
 </body>
 </html>
