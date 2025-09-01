@@ -64,7 +64,7 @@ def home():
             logging.info("Conexión a la base de datos cerrada.")
 
     # Asegúrate de que este sea el nombre correcto de tu archivo HTML para la página principal
-    return render_template('registro_entrevistas.html', interviews=interviews)
+    return render_template('datos_entrevista.html', interviews=interviews)
 
 @app.route('/submit', methods=['POST'])
 def submit():
