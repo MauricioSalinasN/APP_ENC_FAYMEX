@@ -6,6 +6,7 @@ import pyodbc
 from flask import Flask, render_template, request, redirect, url_for, flash
 from datetime import datetime
 import logging
+import os
 
 # Configuración de logging para ver lo que sucede en la terminal
 logging.basicConfig(level=logging.INFO)
@@ -13,16 +14,17 @@ logging.basicConfig(level=logging.INFO)
 # Inicializa la aplicación Flask
 app = Flask(__name__)
 # La clave secreta es necesaria para que los mensajes flash funcionen
-app.secret_key = 'tu_clave_secreta_aqui'
+app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'tu_clave_secreta_por_defecto')
 
 # --- CONFIGURACIÓN DE TU BASE DE DATOS DE AZURE SQL ---
 # ADVERTENCIA: No uses credenciales sensibles directamente en el código para producción.
-# Debes usar variables de entorno o Azure Key Vault para mayor seguridad.
-server = 'server-bd-faymex.database.windows.net'
-database = 'BD_Faymex'
-username = 'msalinas'
-password = 'msn-2009'
-driver = '{ODBC Driver 17 for SQL Server}' # Asegúrate de que este driver esté instalado
+# Se recomienda encarecidamente usar variables de entorno para mayor seguridad.
+# Por ejemplo, puedes configurar estas variables en tu servidor o en tu entorno local.
+server = os.environ.get('AZURE_SQL_SERVER', 'server-bd-faymex.database.windows.net')
+database = os.environ.get('AZURE_SQL_DATABASE', 'BD_Faymex')
+username = os.environ.get('AZURE_SQL_USERNAME', 'msalinas')
+password = os.environ.get('AZURE_SQL_PASSWORD', 'msn-2009')
+driver = '{ODBC Driver 17 for SQL Server}' # Asegúrate de que este driver esté instalado en el sistema
 
 # Crea la cadena de conexión
 connection_string = f'DRIVER={driver};SERVER={server};DATABASE={database};UID={username};PWD={password}'
@@ -51,13 +53,15 @@ def home():
         for row in cursor.fetchall():
             interviews.append(dict(zip(columns, row)))
         
-        logging.info("Datos obtenidos con éxito.")
+        logging.info(f"Se obtuvieron {len(interviews)} registros.")
         
     except pyodbc.Error as ex:
         sqlstate = ex.args[0]
         logging.error(f"Error de base de datos al obtener datos: {sqlstate}")
+        flash(f"Error de conexión a la base de datos: {sqlstate}. Por favor, verifique la configuración.", 'error')
     except Exception as e:
         logging.error(f"Error inesperado al obtener datos: {str(e)}")
+        flash("Ocurrió un error inesperado al cargar los datos.", 'error')
     finally:
         if conn:
             conn.close()
@@ -156,11 +160,12 @@ def submit():
     except pyodbc.Error as ex:
         sqlstate = ex.args[0]
         logging.error(f"Error de base de datos: {sqlstate}")
-        flash(f"Error al guardar la información: {ex}", 'error')
+        # Muestra un mensaje genérico al usuario final, manteniendo el detalle en los logs.
+        flash("Ocurrió un error al guardar la información. Por favor, inténtelo de nuevo.", 'error')
         return redirect(url_for('home'))
     except Exception as e:
         logging.error(f"Error inesperado al guardar la información: {str(e)}")
-        flash(f"Error inesperado: {e}", 'error')
+        flash("Ocurrió un error inesperado. Por favor, inténtelo de nuevo.", 'error')
         return redirect(url_for('home'))
     finally:
         if conn:
