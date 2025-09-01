@@ -63,8 +63,8 @@ def home():
             conn.close()
             logging.info("Conexión a la base de datos cerrada.")
 
-    return render_template('datos_entrevista.html', interviews=interviews)
-
+    # Asegúrate de que este sea el nombre correcto de tu archivo HTML para la página principal
+    return render_template('registro_entrevistas.html', interviews=interviews)
 
 @app.route('/submit', methods=['POST'])
 def submit():
@@ -78,47 +78,47 @@ def submit():
         cursor = conn.cursor()
         logging.info("Conexión exitosa.")
 
-        # Obtener datos del formulario
-        nombre_contacto = request.form['nombre_contacto']
-        cargo = request.form['cargo']
-        departamento = request.form['departamento']
-        fecha_entrevista_str = request.form['fecha_entrevista']
-        fecha_entrevista = datetime.strptime(fecha_entrevista_str, '%Y-%m-%d').date()
-
-        # Manejar la opción "Otro"
-        if departamento == 'Otro':
-            departamento = request.form['otro_departamento']
-
-        # Obtener los valores de los checkboxes para "Desafíos"
-        desafio_datos_dispersos = 'desafio_datos_dispersos' in request.form
-        desafio_acceso_dificil = 'desafio_acceso_dificil' in request.form
-        desafio_falta_reporte = 'desafio_falta_reporte' in request.form
-        desafio_info_no_actualizada = 'desafio_info_no_actualizada' in request.form
-        desafio_dificil_generar_reporte = 'desafio_dificil_generar_reporte' in request.form
-
-        # Obtener los valores de los checkboxes para "Proceso más largo"
-        proceso_mas_largo_manual = 'proceso_mas_largo_manual' in request.form
-        proceso_mas_largo_multiples_fuentes = 'proceso_mas_largo_multiples_fuentes' in request.form
-        proceso_mas_largo_espera_reportes = 'proceso_mas_largo_espera_reportes' in request.form
-        proceso_mas_largo_validacion_datos = 'proceso_mas_largo_validacion_datos' in request.form
-        
-        # Obtener los valores de los checkboxes para "Infraestructura"
-        infraestructura_dependencia_manual = 'infraestructura_dependencia_manual' in request.form
-        infraestructura_falta_estandarizacion = 'infraestructura_falta_estandarizacion' in request.form
-        infraestructura_vulnerabilidades = 'infraestructura_vulnerabilidades' in request.form
-        infraestructura_poca_escalabilidad = 'infraestructura_poca_escalabilidad' in request.form
-
-        # Obtener los valores de los checkboxes para "Decisión"
-        decision_optimizacion_recursos = 'decision_optimizacion_recursos' in request.form
-        decision_reduccion_costos = 'decision_reduccion_costos' in request.form
-        decision_mejora_planificacion = 'decision_mejora_planificacion' in request.form
-        decision_identificacion_ineficiencias = 'decision_identificacion_ineficiencias' in request.form
-
-        comentarios = request.form['comentarios']
+        # Obtener datos del formulario de manera robusta
+        nombre_contacto = request.form.get('nombre_contacto')
+        cargo = request.form.get('cargo')
+        departamento = request.form.get('departamento')
+        fecha_entrevista_str = request.form.get('fecha_entrevista')
+        comentarios = request.form.get('comentarios')
         fecha_registro = datetime.now()
 
+        # Manejar la opción "Otro" para el departamento
+        if departamento == 'Otro':
+            departamento = request.form.get('otro_departamento')
+
+        # Obtener los valores de los checkboxes de forma correcta
+        proceso_mas_largo_list = request.form.getlist('proceso_mas_largo')
+        desafio_info_list = request.form.getlist('desafio_info')
+        infraestructura_desafio_list = request.form.getlist('infraestructura_desafio')
+        decision_list = request.form.getlist('decision')
+
+        # Convertir las listas de valores a booleanos para la base de datos
+        proceso_mas_largo_manual = 'proceso_manual' in proceso_mas_largo_list
+        proceso_mas_largo_multiples_fuentes = 'multiples_fuentes' in proceso_mas_largo_list
+        proceso_mas_largo_espera_reportes = 'espera_reportes' in proceso_mas_largo_list
+        proceso_mas_largo_validacion_datos = 'validacion_datos' in proceso_mas_largo_list
+        
+        desafio_info_desactualizada = 'desactualizada' in desafio_info_list
+        desafio_info_falta_acceso = 'falta_acceso' in desafio_info_list
+        desafio_info_datos_dispersos = 'datos_dispersos' in desafio_info_list
+        desafio_info_falta_reporte = 'falta_reporte' in desafio_info_list
+        desafio_info_dificil_generar_reporte = 'dificil_generar_reporte' in desafio_info_list
+
+        infraestructura_dependencia_manual = 'dependencia_manual' in infraestructura_desafio_list
+        infraestructura_falta_estandarizacion = 'falta_estandarizacion' in infraestructura_desafio_list
+        infraestructura_vulnerabilidades = 'vulnerabilidades' in infraestructura_desafio_list
+        infraestructura_poca_escalabilidad = 'poca_escalabilidad' in infraestructura_desafio_list
+
+        decision_optimizacion_recursos = 'optimizacion_recursos' in decision_list
+        decision_reduccion_costos = 'reduccion_costos' in decision_list
+        decision_mejora_planificacion = 'mejora_planificacion' in decision_list
+        decision_identificacion_ineficiencias = 'identificacion_ineficiencias' in decision_list
+
         # Sentencia SQL para la inserción de datos
-        # Asegúrate de que el orden de las columnas coincida con los datos que estás insertando
         query = """
             INSERT INTO datos_entrevista (
                 nombre_contacto, cargo, departamento, fecha_entrevista,
@@ -136,10 +136,10 @@ def submit():
 
         # Ejecutar la consulta con los datos del formulario
         cursor.execute(query, 
-            nombre_contacto, cargo, departamento, fecha_entrevista,
-            desafio_datos_dispersos, desafio_acceso_dificil,
-            desafio_falta_reporte, desafio_info_no_actualizada,
-            desafio_dificil_generar_reporte, proceso_mas_largo_manual,
+            nombre_contacto, cargo, departamento, fecha_entrevista_str,
+            desafio_info_datos_dispersos, desafio_info_falta_acceso,
+            desafio_info_falta_reporte, desafio_info_desactualizada,
+            desafio_info_dificil_generar_reporte, proceso_mas_largo_manual,
             proceso_mas_largo_multiples_fuentes, proceso_mas_largo_espera_reportes,
             proceso_mas_largo_validacion_datos,
             infraestructura_dependencia_manual, infraestructura_falta_estandarizacion,
@@ -150,14 +150,12 @@ def submit():
         )
         conn.commit()
         logging.info("Datos insertados con éxito.")
-        # Agregamos un mensaje flash para mostrar en la siguiente página
         flash('¡Información guardada con éxito!', 'success')
         return redirect(url_for('home'))
 
     except pyodbc.Error as ex:
         sqlstate = ex.args[0]
         logging.error(f"Error de base de datos: {sqlstate}")
-        # En caso de error, también podemos usar flash para notificar al usuario
         flash(f"Error al guardar la información: {ex}", 'error')
         return redirect(url_for('home'))
     except Exception as e:
